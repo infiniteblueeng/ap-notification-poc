@@ -57,9 +57,6 @@ const LaunchCommunicationPanel = ({ tokenResponse, permissions, setActiveTab }) 
   // Description
   const [description, setDescription] = useState<string>(() => parsed?.description ?? '');
 
-  // Exercise mode
-  const [exercise, setExercise] = useState<boolean>(() => Boolean(parsed?.exercise ?? false));
-
   // Mode - always live right now
   const mode: Mode = 'LIVE';
 
@@ -116,7 +113,6 @@ const LaunchCommunicationPanel = ({ tokenResponse, permissions, setActiveTab }) 
     setTitle(formatTitleForEvent('General'));
     setTitleManuallyEdited(false);
     setTemplateId('');
-    setExercise(false);
     setDescription('');
     setValuesById({});
     // clear persisted storage so next mount uses defaults
@@ -130,7 +126,7 @@ const LaunchCommunicationPanel = ({ tokenResponse, permissions, setActiveTab }) 
       ...(description ? { description } : {}),
       ...(eventType ? { eventType } : {}),
       templateId: `commsTemplate://${templateId}`,
-      ...(typeof exercise === 'boolean' ? { exercise } : {}),
+      exercise: false,
       ...(contextVariables?.length ? { context: { variables: contextVariables } } : {}),
     };
   }
@@ -246,7 +242,6 @@ const LaunchCommunicationPanel = ({ tokenResponse, permissions, setActiveTab }) 
         title,
         titleManuallyEdited,
         description,
-        exercise,
         templateId,
         valuesById,
       });
@@ -254,7 +249,7 @@ const LaunchCommunicationPanel = ({ tokenResponse, permissions, setActiveTab }) 
     } catch {
       // ignore storage errors
     }
-  }, [eventType, title, titleManuallyEdited, description, exercise, templateId, valuesById]);
+  }, [eventType, title, titleManuallyEdited, description, templateId, valuesById]);
 
   // Don't show the launch panel at all if the user doesn't have launch permissions
   if (!permissions?.includes('bc.comms.launch')) return null;
@@ -264,8 +259,6 @@ const LaunchCommunicationPanel = ({ tokenResponse, permissions, setActiveTab }) 
       <LaunchHeader
         title={title}
         description={description}
-        exercise={exercise}
-        onToggleExercise={(next: boolean) => setExercise(next)}
         onSaveTitle={(nextTitle: string) => {
           setTitle(nextTitle);
           setTitleManuallyEdited(true);
