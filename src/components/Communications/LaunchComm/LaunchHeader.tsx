@@ -1,4 +1,4 @@
-import { Check, Pencil, RotateCcw, Save, X } from 'lucide-react';
+import { Pencil, RotateCcw, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 function placeCaretAtEnd(el: HTMLElement) {
@@ -19,8 +19,6 @@ export default function LaunchHeader({
   onSaveTitle, // (nextTitle: string) => void
   description,
   onSaveDescription, // (nextDescription: string) => void
-  exercise, // boolean
-  onToggleExercise, // (next: boolean) => void
 }: any) {
   // title editing state lives here
   const [editingTitle, setEditingTitle] = useState(false);
@@ -120,11 +118,6 @@ export default function LaunchHeader({
     setEditingDescription(false);
   }
 
-  // Exercise toggle click handler
-  function toggleExercise() {
-    onToggleExercise?.(!exercise);
-  }
-
   return (
     <div className="mb-6">
       <div className="flex items-start justify-between gap-4">
@@ -191,24 +184,6 @@ export default function LaunchHeader({
               </p>
             )}
           </div>
-        </div>
-
-        <div className="ml-4 flex items-center gap-3 self-center">
-          <button
-            aria-pressed={!!exercise}
-            aria-label="Toggle exercise mode"
-            onClick={toggleExercise}
-            className={`relative inline-flex h-8 w-[52px] items-center rounded-full border-[2px] border-[#005EF9] focus:outline-none ${exercise ? 'bg-[#005EF9]' : 'bg-transparent'}`}>
-            <span
-              className={`absolute left-[3px] top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full text-white
-              transition-transform duration-200 ease-out will-change-transform
-              ${exercise ? 'translate-x-[18px]' : 'translate-x-0'}
-              ${exercise ? 'bg-white' : 'bg-[#000C2A]'}`}>
-              {exercise ? <Check strokeWidth={2} size={16} color="#000C2A" /> : <X strokeWidth={2} size={16} color="#FFF" />}
-            </span>
-          </button>
-
-          <span className="text-sm text-black font-normal">Exercise Mode</span>
         </div>
       </div>
     </div>
