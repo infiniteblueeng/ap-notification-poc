@@ -22,6 +22,27 @@ type ScopedMount = {
   styleTarget: ShadowRoot | null;
 };
 
+function isPhoneDevice(): boolean {
+  const navigatorWithUserAgentData = navigator as Navigator & {
+    userAgentData?: {
+      mobile?: boolean;
+    };
+  };
+
+  if (navigatorWithUserAgentData.userAgentData?.mobile === true) {
+    return true;
+  }
+
+  if (/Android.*Mobile|iPhone|iPod|Mobi|Windows Phone/i.test(navigator.userAgent)) {
+    return true;
+  }
+
+  const hasCoarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+  const shortestViewportSide = Math.min(window.innerWidth || 0, window.innerHeight || 0);
+
+  return hasCoarsePointer && shortestViewportSide > 0 && shortestViewportSide <= 767;
+}
+
 function ensureHostContainer(): HTMLElement {
   if (isStandalone) {
     const viewRoot = document.getElementById('root-element');
@@ -396,7 +417,7 @@ if (!isDev) {
   if (styleTarget) {
     injectStyles(styleTarget);
   }
-  if (!isStandalone && hasAnyNotificationsPermission()) {
+  if (!isStandalone && !isPhoneDevice() && hasAnyNotificationsPermission()) {
     injectHeaderCommunicationsButton();
   }
 }
