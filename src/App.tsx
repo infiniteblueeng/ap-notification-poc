@@ -44,10 +44,10 @@ function CommunicationsApp({ isDev, isStandalone }: AppProps) {
 
     pushToast({
       type: 'error',
-      title: result.error ? 'Unable to verify credentials' : 'Everbridge credentials required',
+      title: result.error ? 'Unable to verify credentials' : 'Everbridge 360 Communications has not been configured for your organization. Please contact your account administrator or Everbridge Account Manager',
       message: result.error
         ? 'We could not verify your Everbridge credentials. Update them in Integrations Configuration and try again.'
-        : 'Update your credentials in Integrations Configuration before opening Communications.',
+        : null,
     });
   }, [isDev, isStandalone, pushToast, refetchSettingsRow, settingsRow]);
 
