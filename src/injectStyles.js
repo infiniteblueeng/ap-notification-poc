@@ -1,6 +1,9 @@
 // src/injectStyles.ts
 import cssModule from './tailwind.out.css';
 
+/**
+ * @param {HTMLElement | ShadowRoot} [target]
+ */
 export function injectStyles(target = document.head) {
   const cssText = typeof cssModule === 'string' ? cssModule : (cssModule?.default ?? '');
 

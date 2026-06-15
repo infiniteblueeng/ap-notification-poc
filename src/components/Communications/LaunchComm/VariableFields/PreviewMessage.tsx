@@ -37,13 +37,21 @@ function toDisplayValue(v: string | string[] | null | undefined) {
   return Array.isArray(v) ? v.join(', ') : String(v);
 }
 
+function stripVariableMetadataPrefix(value: string) {
+  return value.replace(/^system\.variableMetadata\./i, '');
+}
+
 function buildValueIndex(variables: VariableDef[], valuesById: PreviewMessagesProps['valuesById']) {
   const byKey = new Map<string, string | string[] | null>();
 
   for (const v of variables) {
-    const value = valuesById[v.id] ?? null;
+    const partialContext = (v as any)?.partial?.context ? String((v as any).partial.context) : '';
+    const metadataPath = (v as any)?.partial?.arguments?.find?.((arg: any) => String(arg?.key ?? '').toLowerCase() === 'variablemetadata')?.defaultValue?.value;
+    const metadataKey = metadataPath ? stripVariableMetadataPrefix(String(metadataPath)) : '';
 
-    const keys = [v.id, v.name, v.token, v.uniqueKey, `custom.[${v.name}]`, `custom.${v.token}`];
+    const value = valuesById[v.id] ?? valuesById[v.uniqueKey] ?? valuesById[partialContext] ?? valuesById[v.token] ?? valuesById[v.name] ?? null;
+
+    const keys = [v.id, v.name, v.token, v.uniqueKey, partialContext, metadataKey, `custom.[${v.name}]`, `custom.[${v.token}]`, `custom.${v.token}`, `custom.${v.name}`];
 
     for (const k of keys) {
       const nk = normalizeKey(k);
@@ -54,21 +62,56 @@ function buildValueIndex(variables: VariableDef[], valuesById: PreviewMessagesPr
   return { byKey };
 }
 
+function getIndexedValue(valueIndex: { byKey: Map<string, any> }, keyRaw: string) {
+  const key = keyRaw.trim();
+  return valueIndex.byKey.get(normalizeKey(key)) ?? valueIndex.byKey.get(normalizeKey(stripVariableMetadataPrefix(key)));
+}
+
+function extractRenderVariableKey(expr: string) {
+  const match = expr.match(/^>?\s*renderVariable\s+(.+)$/i);
+  if (!match) return null;
+
+  const rest = match[1].trim();
+  if (!rest) return null;
+
+  const quoted = rest.match(/^(['"])(.*?)\1/);
+  if (quoted) return quoted[2].trim();
+
+  if (/^custom\.\[/i.test(rest)) {
+    const closeIndex = rest.indexOf(']');
+    return closeIndex >= 0 ? rest.slice(0, closeIndex + 1).trim() : rest;
+  }
+
+  return rest.split(/\s+/)[0].trim();
+}
+
+function resolveTemplateExpression(expr: string, valueIndex: { byKey: Map<string, any> }) {
+  const clean = String(expr ?? '').trim();
+  if (!clean) return '';
+
+  const renderVariableKey = extractRenderVariableKey(clean);
+  if (renderVariableKey) {
+    return toDisplayValue(getIndexedValue(valueIndex, renderVariableKey));
+  }
+
+  const printListMatch = clean.match(/^printList\s+(.+)$/i);
+  if (printListMatch) {
+    return toDisplayValue(getIndexedValue(valueIndex, printListMatch[1]));
+  }
+
+  if (!/\s/.test(clean) || /^custom\.\[.*\]$/i.test(clean)) {
+    return toDisplayValue(getIndexedValue(valueIndex, clean));
+  }
+
+  return null;
+}
+
 function interpolateTemplate(raw: string, valueIndex: { byKey: Map<string, any> }) {
   if (!raw) return '';
 
-  return raw.replace(/\{\{\{\s*([^}]+?)\s*\}\}\}/g, (_match, inner) => {
-    const expr = String(inner).trim();
-
-    const printListMatch = expr.match(/^printList\s+(.+)$/i);
-    if (printListMatch) {
-      const keyRaw = printListMatch[1].trim();
-      const val = valueIndex.byKey.get(normalizeKey(keyRaw));
-      return toDisplayValue(val);
-    }
-
-    const val = valueIndex.byKey.get(normalizeKey(expr));
-    return toDisplayValue(val);
+  return raw.replace(/\{\{\{\s*([\s\S]+?)\s*\}\}\}|\{\{\s*([\s\S]+?)\s*\}\}/g, (match, tripleInner, doubleInner) => {
+    const resolved = resolveTemplateExpression(tripleInner ?? doubleInner, valueIndex);
+    return resolved == null ? match : resolved;
   });
 }
 
