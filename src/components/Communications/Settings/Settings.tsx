@@ -131,9 +131,9 @@ export default function Settings({ pushToast, onClose, refresh }: Props) {
         <Button type="submit" disabled={loading}>
           {loading ? 'Saving…' : 'Save Settings'}
         </Button>
-        <Button type="button" onClick={() => onClose?.()} variant="secondary">
+        {/* <Button type="button" onClick={() => onClose?.()} variant="secondary">
           Cancel
-        </Button>
+        </Button> */}
       </div>
     </form>
   );

@@ -12,7 +12,6 @@ export default function CommsSettingsPanel({ pushToast, refresh, onSaved }: Prop
   return (
     <Section
       title="Settings"
-      tone="blue"
       description="Configure Everbridge credentials for Communications. Secret/password are never prefilled.">
       <Settings
         pushToast={pushToast}

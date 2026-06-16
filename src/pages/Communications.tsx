@@ -58,7 +58,8 @@ function CommunicationsContent({ isDev, isStandalone }: { isDev?: boolean; isSta
 
   return (
     <div
-      className={`overflow-auto ${isStandalone ? '' : 'p-10 '} h-full bg-[linear-gradient(146deg,rgba(224,237,255,0.41)_26.27%,rgba(218,217,255,0.50)_37.44%,rgba(224,235,255,0.41)_61.17%,rgba(233,240,255,0.50)_84.9%)] relative w-full`}>
+      className={`overflow-auto ${isStandalone ? 'p-6 ' : 'p-10 '} h-full bg-[linear-gradient(146deg,rgba(224,237,255,0.41)_26.27%,rgba(218,217,255,0.50)_37.44%,rgba(224,235,255,0.41)_61.17%,rgba(233,240,255,0.50)_84.9%)] relative w-full`}
+      style={isStandalone ? { minHeight: 'var(--eb-comms-standalone-min-height, calc(100vh - 8.25rem))' } : undefined}>
       <div className="relative w-full h-full">
         <div className="flex-1 min-h-0 space-y-4 h-full">
           <CommsTabShell tokenResponse={tokenQuery} permissions={permissions} />

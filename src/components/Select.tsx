@@ -47,9 +47,9 @@ export function Select({ children, isLoading, loadingText = 'Loading…', classN
     const rect = btn.getBoundingClientRect();
 
     setMenuStyle({
-      position: 'absolute',
-      top: rect.bottom + window.scrollY + 8,
-      left: rect.left + window.scrollX,
+      position: 'fixed',
+      top: rect.bottom + 8,
+      left: rect.left,
       width: rect.width,
       zIndex: 9999,
     });

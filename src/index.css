@@ -5,8 +5,26 @@
 
 @layer base {
   :host {
+    display: block;
+    width: 100%;
+    min-height: 100%;
+    height: 100%;
     font-size: 16px !important; /* try 17px or 18px if you want */
     @apply text-base;
+  }
+
+  #eb-notifications-app-root {
+    width: 100%;
+    min-height: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  #eb-notifications-app-root,
+  #eb-notifications-app-root *,
+  #eb-notifications-app-root *::before,
+  #eb-notifications-app-root *::after {
+    box-sizing: border-box;
   }
 }
 

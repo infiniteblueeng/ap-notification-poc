@@ -47,7 +47,7 @@ export default function Section({ title, description, children, tone = 'zinc', v
             header: 'bg-gradient-to-r from-zinc-100/70 to-zinc-50 border-zinc-200/70',
             title: 'text-zinc-900',
             desc: 'text-zinc-600',
-            ring: 'ring-zinc-200/60',
+            ring: 'ring-zinc-300',
             divider: 'border-zinc-200/60',
           };
 
