@@ -65,12 +65,14 @@ async function fetchEverbridgeTokenViaPlatform(): Promise<any> {
 type Params = {
   pushToast?: (t: Omit<Toast, 'id'>) => string;
   isDev: boolean; // caller decides (e.g., localhost/dev build => true; platform/prod => false)
+  enabled?: boolean;
 };
 
-export function useEverbridgeToken({ pushToast, isDev }: Params): UseQueryResult<any> {
+export function useEverbridgeToken({ pushToast, isDev, enabled = true }: Params): UseQueryResult<any> {
   return useQuery({
     queryKey: ['everbridgeToken', isDev ? 'dev' : 'prod'],
     queryFn: () => (isDev ? fetchEverbridgeTokenWithCreds() : fetchEverbridgeTokenViaPlatform()),
+    enabled,
     staleTime: 55 * 60 * 1000,
     gcTime: 2 * 60 * 60 * 1000,
     retry: 1,

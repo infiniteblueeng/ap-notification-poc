@@ -11,8 +11,24 @@ import LaunchCommunicationPanel from './LaunchComm/LaunchCommunicationPanel';
 import CommunicationsListPanel from './ListComms/CommunicationsListPanel';
 import CommsSettingsPanel from './Settings/CommSettingsPanel';
 import { useToasts } from 'hooks/useToasts';
+import { ShieldAlert } from 'lucide-react';
 
 type TabKey = 'launch' | 'list' | 'settings';
+
+type CommsTabProps = {
+  tokenResponse: any;
+  permissions?: string[];
+  permissionsLoading?: boolean;
+  permissionsError?: unknown;
+};
+
+type AuthenticatedCommsTabProps = {
+  tokenResponse: any;
+  permissions?: string[];
+  canLaunch: boolean;
+  canList: boolean;
+  showSettings: boolean;
+};
 
 const TabButton = ({ active, children, onClick }: { active: boolean; children: React.ReactNode; onClick: () => void }) => (
   <button type="button" onClick={onClick} className={['relative ml-2 mr-4 pb-3 text-sm font-semibold', active ? 'text-blue-700' : 'text-zinc-700 hover:text-zinc-900'].join(' ')}>
@@ -21,11 +37,61 @@ const TabButton = ({ active, children, onClick }: { active: boolean; children: R
   </button>
 );
 
-const CommsTab = ({ tokenResponse, permissions }) => {
+const AccessState = ({ title, message }: { title: string; message: string }) => (
+  <div className="flex min-h-[220px] w-full items-center justify-center px-4 py-12 text-center">
+    <div className="max-w-lg rounded-xl bg-white/80 px-8 py-7 shadow-[0_8px_24px_rgba(14,30,37,0.06)] ring-1 ring-zinc-100">
+      <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+        <ShieldAlert className="h-5 w-5" aria-hidden="true" />
+      </div>
+      <h2 className="text-xl font-semibold text-zinc-900">{title}</h2>
+      <p className="mt-2 text-sm leading-6 text-zinc-600">{message}</p>
+    </div>
+  </div>
+);
+
+function CommsTabAccessFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="w-full h-full">
+      <div className="border-b border-zinc-200" />
+      <div className="pt-6">{children}</div>
+    </div>
+  );
+}
+
+const CommsTab = ({ tokenResponse, permissions, permissionsLoading = false, permissionsError }: CommsTabProps) => {
   const canLaunch = permissions?.includes('bc.comms.launch');
   const canList = permissions?.includes('bc.comms.list');
   const showSettings = params?.showSettings;
+  const hasAnyPermission = !!canLaunch || !!canList;
 
+  if (permissionsLoading) {
+    return (
+      <CommsTabAccessFrame>
+        <AccessState title="Checking access" message="We are verifying whether you can launch or view communications." />
+      </CommsTabAccessFrame>
+    );
+  }
+
+  if (permissionsError) {
+    return (
+      <CommsTabAccessFrame>
+        <AccessState title="Unable to verify access" message="We could not confirm your communication permissions. Please refresh the page or contact your administrator." />
+      </CommsTabAccessFrame>
+    );
+  }
+
+  if (!hasAnyPermission) {
+    return (
+      <CommsTabAccessFrame>
+        <AccessState title="Not authorized" message="You do not have permission to launch or view communications. Please contact your administrator if you need access." />
+      </CommsTabAccessFrame>
+    );
+  }
+
+  return <AuthenticatedCommsTab tokenResponse={tokenResponse} permissions={permissions} canLaunch={!!canLaunch} canList={!!canList} showSettings={!!showSettings} />;
+};
+
+const AuthenticatedCommsTab = ({ tokenResponse, permissions, canLaunch, canList, showSettings }: AuthenticatedCommsTabProps) => {
   const isDev = process.env.NODE_ENV === 'development';
   const isStandalone = params.standaloneMode;
   const showListView = isDev || isStandalone;

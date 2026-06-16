@@ -39,10 +39,12 @@ export default function Communications({ open, onOpenChange, isStandalone, isDev
 
 function CommunicationsContent({ isDev, isStandalone }: { isDev?: boolean; isStandalone?: boolean }) {
   const { pushToast } = useToasts();
-  const { permissions } = useValidPermissions();
+  const { permissions, isLoading: permissionsLoading, error: permissionsError } = useValidPermissions();
+  const hasCommunicationAccess = permissions.includes('bc.comms.launch') || permissions.includes('bc.comms.list');
   const tokenQuery = useEverbridgeToken({
     pushToast,
     isDev,
+    enabled: !permissionsLoading && hasCommunicationAccess,
   });
 
   useEffect(() => {
@@ -62,7 +64,7 @@ function CommunicationsContent({ isDev, isStandalone }: { isDev?: boolean; isSta
       style={isStandalone ? { minHeight: 'var(--eb-comms-standalone-min-height, calc(100vh - 8.25rem))' } : undefined}>
       <div className="relative w-full h-full">
         <div className="flex-1 min-h-0 space-y-4 h-full">
-          <CommsTabShell tokenResponse={tokenQuery} permissions={permissions} />
+          <CommsTabShell tokenResponse={tokenQuery} permissions={permissions} permissionsLoading={permissionsLoading} permissionsError={permissionsError} />
         </div>
       </div>
     </div>
