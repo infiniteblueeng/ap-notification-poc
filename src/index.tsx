@@ -417,8 +417,16 @@ if (!isDev) {
   if (styleTarget) {
     injectStyles(styleTarget);
   }
-  if (!isStandalone && !isPhoneDevice() && hasAnyNotificationsPermission()) {
-    injectHeaderCommunicationsButton();
+  if (!isStandalone && !isPhoneDevice()) {
+    void hasAnyNotificationsPermission()
+      .then((hasPermission) => {
+        if (hasPermission) {
+          injectHeaderCommunicationsButton();
+        }
+      })
+      .catch((err) => {
+        console.warn('Unable to verify communications permissions for header button', err);
+      });
   }
 }
 
